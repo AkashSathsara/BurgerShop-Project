@@ -1,19 +1,110 @@
 import java.util.*;
 
-class Orders{
+class List{
+	private int nextIndex;
+	private MyClass[] dataArray;
+	List(int size){
+		nextIndex=0;
+		dataArray=new MyClass[size];
+	}
+	private void extendArray(){
+		MyClass[] tempDataArray=new MyClass[(int)(dataArray.length*1.5)];
+		for(int i=0; i<dataArray.length;i++){
+			tempDataArray[i]=dataArray[i];
+		}
+		dataArray=tempDataArray;
+	}
+	
+	private boolean isFull(){
+		return nextIndex>=dataArray.length;
+	}
+	
+	public void add(MyClass data){ 
+		if(isFull()){
+			extendArray();
+		}
+		dataArray[nextIndex++]=data;
+	}
+    
+    public MyClass get(int index){
+		if(index>=0 && index<nextIndex){
+			return dataArray[index];
+		}else{
+			return null;
+		}
+	}
+	
+	public int size(){
+		return nextIndex;
+	}
+	
+	public boolean isEmpty(){
+		return nextIndex<=0;
+	}
+	
+	/*
+	public void clear(){
+		nextIndex=0;
+	}
+	
+	public void printList(){
+		System.out.print("[");
+		for(int i=0; i<nextIndex;i++){
+			System.out.print(dataArray[i]+", ");
+		}  
+		System.out.println(isEmpty() ? "empty":"\b\b]");
+	}
+	
+	public boolean contains(MyClass data){
+		for(int i=0;i<nextIndex;i++){
+			if(dataArray[i].getOrderId().equals(data.getOrderId())){
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private void remove(int index){
+		if(index>0 && index<nextIndex){
+			for(int i=index;i<nextIndex-1;i++){
+				dataArray[i]=dataArray[i+1];
+			}
+			nextIndex--;
+		}
+	}
+	
+	public void add(int index, MyClass data){
+		if(index>=0 && index<=nextIndex){
+			if(isFull()){
+			extendArray();
+		}
+		for(int i=nextIndex;i>=index;i--){
+				dataArray[i]=dataArray[i-1];
+		}
+		dataArray[index]=data;
+		nextIndex++;
+	   }
+    }
+	
+	public int peek(){
+		if(isEmpty()){
+			return -1;
+		}
+		return ;
+	} */
+	
+}
+		
+
+//====================================================================================================================
+class MyClass{
 	private String orderId;
 	private String phoneNumber;
 	private String name;
 	private int qty;
 	private int status;
-	
-	public static final double UNITPRICE = 500.00;
 
-	public static final int PREPARING = 0;
-	public static final int DELIVERED = 1;
-	public static final int CANCEL = 2;
-	
-	public Orders(String orderId, String phoneNumber, String name, int qty, int status){
+	public MyClass(String orderId, String phoneNumber, String name, int qty, int status){
 		this.orderId = orderId;
 		this.phoneNumber = phoneNumber;
 		this.name = name;
@@ -23,8 +114,8 @@ class Orders{
 		this.status = status;
 	}
 	
-	public Orders(){}
-	
+	public MyClass(){}
+
 	public void setOrderId(String orderId){
 		this.orderId = orderId;
 	}
@@ -69,20 +160,23 @@ class Orders{
 	public int getStatus(){
 		return status;
 	}
+	
+	public String toString(){
+		return "{"+orderId+"-"+phoneNumber+"-"+name+"-"+qty+"-"+status+"}";
+	}
 }
+//===================================================================================================================
 
-//=============================================================================================
-
-   class Example{
+   class Example16{
 
     final static double BURGERPRICE = 500;
-
-	public static Orders[] orders = new Orders[0];
-	
+   
     // Order status
     public static final int CANCEL = 0;
     public static final int PREPARING = 1;
     public static final int DELIVERED = 2;
+    
+    public static List list;
 
     // console clear
     public final static void clearConsole() {
@@ -100,7 +194,7 @@ class Orders{
         }
     }
     
-    //extend Array
+  /*  //extend Array
     public static void extendArray(){
 		Orders[] temp = new Orders[orders.length+1];
 		
@@ -112,7 +206,7 @@ class Orders{
 		
 		orders = temp;
 		
-	}
+	} */
 
 
     // validation Customer ID
@@ -133,18 +227,25 @@ class Orders{
     // generate order Id
     public static String generateOrderId() {
 		
-        if (orders.length==0){
+        if (list.size()==0){
 			return "B0001";
 		}
-		String lastOrderId = orders[orders.length - 1].getOrderId();
+		String lastOrderId = list.get(0).getOrderId();
 		int number = Integer.parseInt(lastOrderId.split("B")[1]); //1
 		number++;//2
 		return String.format("B%04d",number); //printf("",) //B0002
     }
+    
+    public static void intializeList(){
+		if(list==null){
+			list=new List(10);
+		}
+	}
 
     // placeOrder
     public static void placeOrder() {
         Scanner input = new Scanner(System.in);
+        intializeList();
         System.out.println("-------------------------------------------------------------------------");
         System.out.println("|\t\t\t\tPLACE ORDER\t\t\t\t|");
         System.out.println("-------------------------------------------------------------------------\n\n");
@@ -160,11 +261,11 @@ class Orders{
 			}
             boolean isExistCustomer = false;
             String customerName = "";
-            for (int i = 0; i < orders.length; i++) {
-                if (customerId.equals(orders[i].getPhoneNumber())) {
+            for (int i = 0; i < list.size(); i++) {
+                if (customerId.equals(list.get(i).getPhoneNumber())) {
                     isExistCustomer = true;
-                    System.out.println("Enter Customer Name: " + orders[i].getName());
-                    customerName = orders[i].getName();
+                    System.out.println("Enter Customer Name: " + list.get(i).getName());
+                    customerName = list.get(i).getName();
                     break;
                 }
             }
@@ -182,9 +283,11 @@ class Orders{
                     System.out.print("\tAre you confirm order - ");
                     String option = input.next().toUpperCase();
                     if (option.equalsIgnoreCase("Y")) {
-                        extendArray();
-
-                        orders[orders.length - 1] = new Orders(orderId,customerId,customerName,qty,PREPARING);
+                        /*extendArray();*/
+                 
+                        MyClass tomp=new MyClass(orderId,customerId,customerName,qty,PREPARING);
+                        list.add(tomp); 
+                        
                         
                         System.out.println("\n\tYour order is enter to the system successfully...");
                         break L1;
@@ -227,12 +330,12 @@ class Orders{
         String[] sortCustomerName = new String[0];
         double[] customerTotalBuyingArray = new double[0];
 
-        for (int i = 0; i < orders.length; i++) {
+        for (int i = 0; i < list.size(); i++) {
             boolean isExist = false;
             for (int j = 0; j < sortCustomerIdArray.length; j++) {
-                if (sortCustomerIdArray[j].equals(orders[i].getPhoneNumber())) {
-                    if (orders[i].getStatus()!=CANCEL){
-						customerTotalBuyingArray[j] += (orders[i].getQty()*BURGERPRICE);
+                if (sortCustomerIdArray[j].equals(list.get(i).getPhoneNumber())) {
+                    if (list.get(i).getStatus()!=CANCEL){
+						customerTotalBuyingArray[j] += (list.get(i).getQty()*BURGERPRICE);
 					}
                     isExist = true;
                 }
@@ -250,9 +353,9 @@ class Orders{
                 sortCustomerName = tempSortCustomerName;
                 customerTotalBuyingArray = tempCustomerTotalBuyingArray;
 
-                sortCustomerIdArray[sortCustomerIdArray.length - 1] = orders[i].getPhoneNumber();
-                sortCustomerName[sortCustomerName.length - 1] = orders[i].getName();
-                customerTotalBuyingArray[customerTotalBuyingArray.length - 1] = (orders[i].getQty()*BURGERPRICE);
+                sortCustomerIdArray[sortCustomerIdArray.length - 1] = list.get(i).getPhoneNumber();
+                sortCustomerName[sortCustomerName.length - 1] = list.get(i).getName();
+                customerTotalBuyingArray[customerTotalBuyingArray.length - 1] = (list.get(i).getQty()*BURGERPRICE);
             }
         }
         // sort
@@ -313,8 +416,8 @@ class Orders{
 		System.out.print("Enter order ID - ");
 		String xyz= input.next();				
 		int num=0;
-		L3:for(int i=0;i<(orders.length);i++){
-			 if(xyz.equals(orders[i].getOrderId())){
+		L3:for(int i=0;i<(list.size());i++){
+			 if(xyz.equals(list.get(i).getOrderId())){
 		          num=i;        
 	           }
            }
@@ -322,12 +425,12 @@ class Orders{
 		System.out.println("---------------------------------------------------------------------------------------------");
         System.out.println("OrderID\t\tCustomerID\tName\t\tQuantity\tOrderValue\tOrderStatus  ");
         System.out.println("---------------------------------------------------------------------------------------------");
-        if(orders[num].getStatus()==0){
-		System.out.println(orders[num].getOrderId()+"\t\t"+orders[num].getPhoneNumber()+"\t"+ orders[num].getName()+"\t\t"+orders[num].getQty()+"\t\t"+(orders[num].getQty())*BURGERPRICE+"\t\t"+"Cancelled");
-	    }else if(orders[num].getStatus()==1){
-		System.out.println(orders[num].getOrderId()+"\t\t"+orders[num].getPhoneNumber()+"\t"+ orders[num].getName()+"\t\t"+orders[num].getQty()+"\t\t"+(orders[num].getQty())*BURGERPRICE+"\t\t"+"Prepared");
-	    }else if(orders[num].getStatus()==2){
-		System.out.println(orders[num].getOrderId()+"\t\t"+orders[num].getPhoneNumber()+"\t"+ orders[num].getName()+"\t\t"+orders[num].getQty()+"\t\t"+(orders[num].getQty())*BURGERPRICE+"\t\t"+"Dilevered");
+        if(list.get(num).getStatus()==0){
+		System.out.println(list.get(num).getOrderId()+"\t\t"+list.get(num).getPhoneNumber()+"\t"+ list.get(num).getName()+"\t\t"+list.get(num).getQty()+"\t\t"+(list.get(num).getQty())*BURGERPRICE+"\t\t"+"Cancelled");
+	    }else if(list.get(num).getStatus()==1){
+		System.out.println(list.get(num).getOrderId()+"\t\t"+list.get(num).getPhoneNumber()+"\t"+ list.get(num).getName()+"\t\t"+list.get(num).getQty()+"\t\t"+(list.get(num).getQty())*BURGERPRICE+"\t\t"+"Prepared");
+	    }else if(list.get(num).getStatus()==2){
+		System.out.println(list.get(num).getOrderId()+"\t\t"+list.get(num).getPhoneNumber()+"\t"+ list.get(num).getName()+"\t\t"+list.get(num).getQty()+"\t\t"+(list.get(num).getQty())*BURGERPRICE+"\t\t"+"Dilevered");
 		}
         System.out.println("---------------------------------------------------------------------------------------------");
 		System.out.println(" ");
@@ -360,15 +463,15 @@ class Orders{
 		System.out.print("Enter customer ID - "); 
 		 String cust=input.next();
 		int num=0;
-		L3:for(int i=0;i<orders.length;i++){
-			 if(cust.equals(orders[i].getPhoneNumber())){
+		L3:for(int i=0;i<list.size();i++){
+			 if(cust.equals(list.get(i).getPhoneNumber())){
 		          num=i;
 		          break L3;
 			  }
 	       }
 	    System.out.println("");
-	    System.out.println("CustomerID - "+orders[num].getPhoneNumber());
-        System.out.println("Name       - "+orders[num].getName());
+	    System.out.println("CustomerID - "+list.get(num).getPhoneNumber());
+        System.out.println("Name       - "+list.get(num).getName());
         System.out.println(" ");
         System.out.println("Customer Order Details ");
         System.out.println("=======================");
@@ -378,7 +481,7 @@ class Orders{
         System.out.println("-----------------------------------------------");
         
        
-                  System.out.println(orders[num].getOrderId()+"\t\t"+orders[num].getQty()+"\t\t"+(orders[num].getQty())*BURGERPRICE);
+                  System.out.println(list.get(num).getOrderId()+"\t\t"+list.get(num).getQty()+"\t\t"+(list.get(num).getQty())*BURGERPRICE);
                   System.out.println("-----------------------------------------------");
                 
 	       
@@ -424,9 +527,9 @@ class Orders{
 		System.out.println("---------------------------------------------------------------------------------------------");
         System.out.println("|OrderID\tCustomerID\tName\t\tQuantity\tOrderValue   ");
 	    System.out.println("---------------------------------------------------------------------------------------------");
-	    for(int i=0; i<orders.length; i++){
-			if(orders[i].getStatus()==2){
-				System.out.println(orders[i].getOrderId()+"\t\t"+orders[i].getPhoneNumber()+"\t"+orders[i].getName()+"\t\t"+orders[i].getQty()+"\t\t"+(orders[i].getQty())*BURGERPRICE);
+	    for(int i=0; i<list.size(); i++){
+			if(list.get(i).getStatus()==2){
+				System.out.println(list.get(i).getOrderId()+"\t\t"+list.get(i).getPhoneNumber()+"\t"+list.get(i).getName()+"\t\t"+list.get(i).getQty()+"\t\t"+(list.get(i).getQty())*BURGERPRICE);
 			    System.out.println("---------------------------------------------------------------------------------------------");
 			 }
 		 }
@@ -453,9 +556,9 @@ class Orders{
 		System.out.println("---------------------------------------------------------------------------------------------");
         System.out.println("|OrderID\tCustomerID\tName\t\tQuantity\tOrderValue   ");
 	    System.out.println("---------------------------------------------------------------------------------------------");
-	    for(int i=0; i<orders.length; i++){
-			if(orders[i].getStatus()==1){
-				System.out.println(orders[i].getOrderId()+"\t\t"+orders[i].getPhoneNumber()+"\t"+orders[i].getName()+"\t\t"+orders[i].getQty()+"\t\t"+(orders[i].getQty())*BURGERPRICE);
+	    for(int i=0; i<list.size(); i++){
+			if(list.get(i).getStatus()==1){
+				System.out.println(list.get(i).getOrderId()+"\t\t"+list.get(i).getPhoneNumber()+"\t"+list.get(i).getName()+"\t\t"+list.get(i).getQty()+"\t\t"+(list.get(i).getQty())*BURGERPRICE);
 			    System.out.println("---------------------------------------------------------------------------------------------");
 			 }
 		 }
@@ -482,9 +585,9 @@ class Orders{
 		System.out.println("---------------------------------------------------------------------------------------------");
         System.out.println("|OrderID\tCustomerID\tName\t\tQuantity\tOrderValue   ");
 	    System.out.println("---------------------------------------------------------------------------------------------");
-	   for(int i=0; i<orders.length; i++){
-			if(orders[i].getStatus()==0){
-				System.out.println(orders[i].getOrderId()+"\t\t"+orders[i].getPhoneNumber()+"\t"+orders[i].getName()+"\t\t"+orders[i].getQty()+"\t\t"+(orders[i].getQty())*BURGERPRICE);
+	   for(int i=0; i<list.size(); i++){
+			if(list.get(i).getStatus()==0){
+				System.out.println(list.get(i).getOrderId()+"\t\t"+list.get(i).getPhoneNumber()+"\t"+list.get(i).getName()+"\t\t"+list.get(i).getQty()+"\t\t"+(list.get(i).getQty())*BURGERPRICE);
 			    System.out.println("---------------------------------------------------------------------------------------------");
 			 }
 		 }
@@ -521,12 +624,12 @@ class Orders{
 		System.out.print("Enter order ID - ");
 		String order= input.next();
 		int num=0;
-		for(int i=0;i<orders.length;i++){
-		  if(order.equals(orders[i].getOrderId())){
+		for(int i=0;i<list.size();i++){
+		  if(order.equals(list.get(i).getOrderId())){
 		      num=i;
 	          }
 		  }
-	          if(orders[num].getStatus()==0){	       
+	          if(list.get(num).getStatus()==0){	       
 			    System.out.println("This order is already cancelled...You can not upate this order");
 			    System.out.print("Do you want to go to home page (Y/N)");    
                    char exit= input.next().toLowerCase().charAt(0);
@@ -538,7 +641,7 @@ class Orders{
 						clearConsole();
 						continue L2;
 					}
-		      }else if(orders[num].getStatus()==2){  		  
+		      }else if(list.get(num).getStatus()==2){  		  
 			    System.out.println("This order is already delivered...You can not upate this order");
 			    System.out.print("Do you want to go to home page (Y/N)");    
                    char exit= input.next().toLowerCase().charAt(0);
@@ -550,14 +653,14 @@ class Orders{
 						clearConsole();
 						continue L2;
 					}
-		      }else if(orders[num].getStatus()==1){
+		      }else if(list.get(num).getStatus()==1){
 		   
 			System.out.println(" ");
-			System.out.println("OrderID      -"+orders[num].getOrderId());
-			System.out.println("CustomerID   -"+orders[num].getPhoneNumber());	
-	        System.out.println("Name         -"+orders[num].getName());
-	        System.out.println("Quantity     -"+orders[num].getQty());
-	        System.out.println("OrderValue   -"+(orders[num].getQty())*BURGERPRICE);	         
+			System.out.println("OrderID      -"+list.get(num).getOrderId());
+			System.out.println("CustomerID   -"+list.get(num).getPhoneNumber());	
+	        System.out.println("Name         -"+list.get(num).getName());
+	        System.out.println("Quantity     -"+list.get(num).getQty());
+	        System.out.println("OrderValue   -"+(list.get(num).getQty())*BURGERPRICE);	         
 	        System.out.println("OrderStatus  - Preparing");
 	        
 	        			
@@ -572,13 +675,13 @@ class Orders{
 			System.out.println("Quantity Update ");
 			System.out.println("================= ");
 			System.out.println(" ");
-			System.out.println("OrderID     - "+orders[num].getOrderId());
-			System.out.println("CustomerID  - "+orders[num].getPhoneNumber());
-			System.out.println("Name        - "+orders[num].getName());
+			System.out.println("OrderID     - "+list.get(num).getOrderId());
+			System.out.println("CustomerID  - "+list.get(num).getPhoneNumber());
+			System.out.println("Name        - "+list.get(num).getName());
 			System.out.println(" ");
 			System.out.print("Enter your quantity update value -");
 				int x=input.nextInt();
-				orders[num].setQty(x);
+				list.get(num).setQty(x);
 			System.out.println(" ");				
 			System.out.println("           update order quantity successfully...... ");
 			System.out.println(" ");
@@ -601,9 +704,9 @@ class Orders{
 			System.out.println("Status Update ");
 			System.out.println("============== ");
 			System.out.println(" ");
-			System.out.println("OrderID     - "+orders[num].getOrderId());
-			System.out.println("CustomerID  - "+orders[num].getPhoneNumber());
-			System.out.println("Name        - "+orders[num].getName());
+			System.out.println("OrderID     - "+list.get(num).getOrderId());
+			System.out.println("CustomerID  - "+list.get(num).getPhoneNumber());
+			System.out.println("Name        - "+list.get(num).getName());
 			System.out.println("  ");
 			System.out.println("            (0)Cancel");
 			System.out.println("            (1)Preparing");
@@ -612,11 +715,11 @@ class Orders{
 			System.out.print("Enter new order status -  ");
                 int y= input.nextInt();
                if(y==0){
-				   orders[num].setStatus(0);
+				   list.get(num).setStatus(0);
 			   }else if(y==1){
-				   orders[num].setStatus(1); 
+				   list.get(num).setStatus(1); 
                }else if(y==2){
-				   orders[num].setStatus(2); 
+				   list.get(num).setStatus(2); 
                 }
 			System.out.println("  ");                
 			System.out.println("Update order status successfully..... ");
